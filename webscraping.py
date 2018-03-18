@@ -3,6 +3,7 @@
 
 from lxml import html
 import requests
+import shutil
 
 # Query the results of searching for 'ICT' on the official Fontys website.
 # This returns the page data of the particular link.
@@ -42,3 +43,20 @@ print("titles: ", titles)
 print("mails: ", mails)
 print("phones: ", phones)
 print("locations: ", locations)
+
+# Gets the logo url from the img tag in the navigation bar
+# This is a child of the div with classes 'columns', 'small-4', 'medium-3' and 'logo'
+# @src gets the text set in the src attribute of the img tag
+logo_link = tree.xpath('//div[@class="columns small-4 medium-3 logo"]/a/figure/img/@src')
+
+# Request the logo from the scraped source
+# stream=True makes sure it will be streamed instead of downloaded in a single go
+logo_request = requests.get("https://fontys.nl" + logo_link[0], stream=True)
+# Open (or create if not present) logo.png in the current directory in write (w) and binary (b) mode
+# Reference that file with the variable logo_file
+with open('logo.png', 'wb') as logo_file:
+    # shutils is Pythons built-in file operations package
+    # copyfileobj takes the raw binary input from the logo stream and puts it in the location of the logo_file variable
+    shutil.copyfileobj(logo_request.raw, logo_file)
+# Clean up by deleting the request stream
+del logo_request
